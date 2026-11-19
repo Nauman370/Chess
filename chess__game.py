@@ -36,6 +36,7 @@ def draw_piece():
                         screen.blit(text,text.get_rect(center=(x,y)))
 board=chess.Board()
 running=True
+selected=None
 while running and not board.is_game_over():
     for event in pygame.event.get():
         if event.type==pygame.QUIT:
