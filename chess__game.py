@@ -2,6 +2,7 @@ import chess
 import pygame
 
 pygame.init()
+FONT=pygame.font.SysFont("arial",48)
 screen=pygame.display.set_mode((640,640))
 pygame.display.set_caption("Chess")
 
@@ -18,6 +19,21 @@ def draw_board():
                         color=DARK
                   pygame.draw.rect(screen,color,(col*SQUARE,row*SQUARE,SQUARE,SQUARE))
 
+def draw_piece():
+      for row in range(8):
+            for col in range(8):
+                  square=chess.square(col,7-row)
+                  piece=board.piece_at(square)
+
+                  if piece is not None:
+                        if piece.color==chess.WHITE:
+                              color=(0,0,220)
+                        else:
+                              color=(0,0,0)
+                        text=FONT.render(piece.symbol().upper(),True,color)
+                        x=col*SQUARE+SQUARE//2
+                        y=row*SQUARE+SQUARE//2
+                        screen.blit(text,text.get_rect(center=(x,y)))
 board=chess.Board()
 running=True
 while running and not board.is_game_over():
@@ -26,6 +42,7 @@ while running and not board.is_game_over():
             running=False
 
     draw_board()
+    draw_piece()
     pygame.display.flip()
 pygame.quit()
 
