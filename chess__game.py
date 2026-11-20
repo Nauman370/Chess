@@ -60,6 +60,21 @@ def draw_status():
             message=message+"-Check"
       text=small_FONT.render(message,True,(255,255,255))
       screen.blit(text,(OFFSET_X,BOARD_SIZE+12))
+      if board.is_checkmate():
+            if board.turn==chess.WHITE:
+                  message="Checkmate, Black Won"
+            else:
+                  message="Checkmate White Won"
+      elif board.is_game_over():
+            message= "Draw"
+      else:
+            if board.turn==chess.WHITE:
+                  message="White's Move"
+            else:
+                  message="Black's Move"
+            if board.is_check():
+                  message=message+"-Check"
+
 def selected_piece():
       if selected is not None:
             col=chess.square_file(selected)
@@ -71,7 +86,8 @@ selected=None
 flash_square=None
 flash_time=0
 
-while running and not board.is_game_over():
+while running:
+    
     for event in pygame.event.get():
         if event.type==pygame.QUIT:
             running=False
@@ -79,12 +95,13 @@ while running and not board.is_game_over():
               running=False  
         if event.type==pygame.MOUSEBUTTONDOWN:
               x,y=event.pos
-              if y<BOARD_SIZE and OFFSET_X<=x<OFFSET_X+BOARD_SIZE:
+              if not board.is_game_over() and y<BOARD_SIZE and OFFSET_X<=x<OFFSET_X+BOARD_SIZE:
 
                     
                   col=(x-OFFSET_X)//SQUARE
                   row=y//SQUARE
                   square=chess.square(col,7-row)
+
 
                   if selected is None:
                     piece=board.piece_at(square)
