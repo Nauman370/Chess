@@ -3,14 +3,14 @@ import pygame
 
 pygame.init()
 small_FONT=pygame.font.SysFont("arial",48)
-screen=pygame.display.set_mode((0,0),pygame.FULLSCREEN)
+info=pygame.display.Info()
+screen=pygame.display.set_mode((info.current_w-100,info.current_h-120))
 pygame.display.set_caption("Chess")
-WIDTH,HEIGHT=screen.get_size()
-STATUS_H=50
-SQUARE=(HEIGHT-STATUS_H)//8
-BOARD_SIZE=(SQUARE*8)
-OFFSET_X=(WIDTH-BOARD_SIZE)//2
-piece_font=pygame.font.SysFont("segoeuisymbol",int(SQUARE*0.8))
+status_H=50
+def new_layout():
+      global screen,WIDHT,HEIGHT,SQUARE,BOARD,OFFSET_X,piece_font
+      screen=pygame.display.get_surface()
+      WIDHT,HEIGHT=
 
 LIGHT=(240,217,181)
 DARK=(181,136,99)
@@ -52,19 +52,12 @@ def draw_flash():
                   pygame.draw.rect(screen,(220,40,40),(OFFSET_X+col*SQUARE,row*SQUARE,SQUARE,SQUARE))
 def draw_status():
       pygame.draw.rect(screen,(50,50,50),(0,BOARD_SIZE,WIDTH,HEIGHT-BOARD_SIZE))
-      if board.turn==chess.WHITE:
-            message="WHITE'S Move"
-      else:
-            message="Black's move"
-      if board.is_check():
-            message=message+"-Check"
-      text=small_FONT.render(message,True,(255,255,255))
-      screen.blit(text,(OFFSET_X,BOARD_SIZE+12))
       if board.is_checkmate():
+
             if board.turn==chess.WHITE:
-                  message="Checkmate, Black Won"
+                  message="Black won,checkmate"
             else:
-                  message="Checkmate White Won"
+                  message="White won,checkmate"
       elif board.is_game_over():
             message= "Draw"
       else:
@@ -72,9 +65,10 @@ def draw_status():
                   message="White's Move"
             else:
                   message="Black's Move"
-            if board.is_check():
-                  message=message+"-Check"
-
+      if board.is_check():
+            message=message+"-Check"
+      text=small_FONT.render(message,True,(255,255,255))
+      screen.blit(text,(OFFSET_X,BOARD_SIZE+12))
 def selected_piece():
       if selected is not None:
             col=chess.square_file(selected)
