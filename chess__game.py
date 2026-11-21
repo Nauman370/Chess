@@ -66,6 +66,23 @@ def draw_flash():
                   col=chess.square_file(flash_square)
                   row=7-chess.square_rank(flash_square)
                   pygame.draw.rect(screen,(220,40,40),(OFFSET_X+col*SQUARE,row*SQUARE,SQUARE,SQUARE))
+def confirm_screen():
+      if confirm_switch:
+            overlay=pygame.Surface((WIDTH,HEIGHT),pygame.SRCALPHA)
+            overlay.fill((0,0,0,170))
+            screen.blit(overlay,(0,0))
+            if bot_mode:
+
+                  new_mode="2 players"
+            else:
+                  new_mode="Bot mode"
+
+            lines=["Switch to"+ new_mode+"?","C=continue","R= Restart","C= Cancel"]
+            for i, line in enumerate(lines):
+                  text=small_FONT.render(line,True,(255,255,255))
+                  screen.blit(text,text.get_rect(center=(WIDTH//2,HEIGHT//2-90+i*60)))
+
+
 def draw_status():
       pygame.draw.rect(screen,(50,50,50),(0,BOARD_SIZE,WIDTH,HEIGHT-BOARD_SIZE))
 
@@ -96,9 +113,9 @@ def draw_status():
       screen.blit(text,(OFFSET_X,BOARD_SIZE+12))
 def  do_undo():
       global selected
-      if pending_promotion is None and len(board.move_stack)>0:
+      if not confirm_switch and (not bot_mode or board.turn==chess.WHITE) and pending_promotion is None and len(board.move_stack)>0:
             board.pop()
-            if bot_mode and board.turn==chess.BLACK and len(board.move_stack)>0:
+            if bot_mode and not confirm_switch and board.turn==chess.BLACK and len(board.move_stack)>0:
                   board.pop()
             selected=None
 def undo_button():
@@ -112,7 +129,7 @@ def switch_mode(restart):
       selected=None
       pending_promotion=None
       confirm_switch=False
-      
+
 def selected_piece():
       if selected is not None:
             col=chess.square_file(selected)
@@ -143,8 +160,14 @@ while running:
               running=False  
         if event.type==pygame.KEYDOWN and event.key==pygame.K_u:
               do_undo()
-        if event.type==pygame.KEYDOWN and event.key==pygame.K_m:
-              toggle_mode()
+        if event.type==pygame.KEYDOWN and event.key==pygame.K_m and pending_promotion is  None:
+              confirm_switch=not confirm_switch
+        if event.type==pygame.KEYDOWN and confirm_switch:
+              if event.key==pygame.K_c:
+                    switch_mode(False)
+              elif event.key==pygame.K_r:
+                    switch_mode(True)
+        
 
         if event.type==pygame.VIDEORESIZE:
               new_layout()
@@ -199,6 +222,7 @@ while running:
     selected_piece()
     draw_status()
     draw_flash()
+    confirm_screen()
     pygame.display.flip()
 pygame.quit()
 
