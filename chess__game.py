@@ -66,14 +66,11 @@ def draw_flash():
                   row=7-chess.square_rank(flash_square)
                   pygame.draw.rect(screen,(220,40,40),(OFFSET_X+col*SQUARE,row*SQUARE,SQUARE,SQUARE))
 def draw_status():
+      pygame.draw.rect(screen,(50,50,50),(0,BOARD_SIZE,WIDTH,HEIGHT-BOARD_SIZE))
 
-      if pending_promotion is True:
+      if pending_promotion is not None:
             message="Q to queen,R to rook,B to bishop,N for knight"
       elif board.is_checkmate():
-
-            pygame.draw.rect(screen,(50,50,50),(0,BOARD_SIZE,WIDTH,HEIGHT-BOARD_SIZE))
-      if board.is_checkmate():
-
             if board.turn==chess.WHITE:
                   message="Black won,checkmate"
             else:
@@ -85,8 +82,8 @@ def draw_status():
                   message="White's Move"
             else:
                   message="Black's Move"
-      if board.is_check():
-            message=message+"-Check"
+            if board.is_check():
+                  message=message+"-Check"
       text=small_FONT.render(message,True,(255,255,255))
       screen.blit(text,(OFFSET_X,BOARD_SIZE+12))
 def selected_piece():
@@ -147,7 +144,7 @@ while running:
                                 board.push(move)
                           elif square!=selected:
                                flash_square=square
-                          flash_time=pygame.time.get_ticks()
+                               flash_time=pygame.time.get_ticks()
                     selected=None
     screen.fill((30,30,30))
     draw_board()
