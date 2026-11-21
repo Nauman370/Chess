@@ -1,5 +1,6 @@
 import chess
 import pygame
+import random
 
 pygame.init()
 small_FONT=pygame.font.SysFont("arial",48)
@@ -84,8 +85,29 @@ def draw_status():
                   message="Black's Move"
             if board.is_check():
                   message=message+"-Check"
-      text=small_FONT.render(message,True,(255,255,255))
+      pygame.draw.rect(screen,(90,90,90),undo_button())
+      label=small_FONT.render("Undo",True,(255,255,255))
+      screen.blit(label,label.get_rect(center=undo_button().center))
+      if bot_mode:
+            mode_message="[Bot mode]"
+      else:
+            mode_message="[2 player]"
+      text=small_FONT.render(message+mode_message,True,(255,255,255))
       screen.blit(text,(OFFSET_X,BOARD_SIZE+12))
+def  do_undo():
+      global selected
+      if pending_promotion is None and len(board.move_stack)>0:
+            board.pop()
+            if bot_mode and board.turn==chess.BLACK and len(board.move_stack)>0:
+                  board.pop()
+            selected=None
+def undo_button():
+      return pygame.Rect(OFFSET_X+BOARD_SIZE-120,BOARD_SIZE+5,120,40)
+def toggle_mode():
+      global bot_mode,bot_wait,selected
+      bot_mode=not bot_mode
+      bot_wait=None
+      selected=None   
 def selected_piece():
       if selected is not None:
             col=chess.square_file(selected)
@@ -97,6 +119,8 @@ selected=None
 pending_promotion=None
 flash_square=None
 flash_time=0
+bot_wait=None
+bot_mode=True
 
 def piece_promotion(from_sq,to_sq,letter):
       if letter in PROMOTION_PIECES:
@@ -111,6 +135,11 @@ while running:
             running=False
         if event.type==pygame.KEYDOWN and event.key==pygame.K_ESCAPE:
               running=False  
+        if event.type==pygame.KEYDOWN and event.key==pygame.K_u:
+              do_undo()
+        if event.type==pygame.KEYDOWN and event.key==pygame.K_m:
+              toggle_mode()
+
         if event.type==pygame.VIDEORESIZE:
               new_layout()
         if event.type==pygame.KEYDOWN and pending_promotion is not None:
@@ -121,7 +150,9 @@ while running:
                     pending_promotion=None
         if event.type==pygame.MOUSEBUTTONDOWN:
               x,y=event.pos
-              if pending_promotion  is None  and not board.is_game_over() and y<BOARD_SIZE and OFFSET_X<=x<OFFSET_X+BOARD_SIZE:
+              if undo_button().collidepoint(event.pos):
+                    do_undo()
+              if (not  bot_mode or board.turn==chess.WHITE) and pending_promotion  is None  and not board.is_game_over() and y<BOARD_SIZE and OFFSET_X<=x<OFFSET_X+BOARD_SIZE:
 
                     
                   col=(x-OFFSET_X)//SQUARE
@@ -146,6 +177,16 @@ while running:
                                flash_square=square
                                flash_time=pygame.time.get_ticks()
                     selected=None
+    if bot_mode and board.turn==chess.BLACK and not board.is_game_over() and pending_promotion is None:
+          if bot_wait is None:
+                bot_wait=pygame.time.get_ticks()
+          elif pygame.time.get_ticks()-bot_wait>500:
+                bot_move=random.choice(list(board.legal_moves))
+                board.push(bot_move)
+                bot_wait=None
+    else:
+          bot_wait=None
+                
     screen.fill((30,30,30))
     draw_board()
     draw_piece()
