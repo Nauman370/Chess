@@ -103,11 +103,16 @@ def  do_undo():
             selected=None
 def undo_button():
       return pygame.Rect(OFFSET_X+BOARD_SIZE-120,BOARD_SIZE+5,120,40)
-def toggle_mode():
-      global bot_mode,bot_wait,selected
+def switch_mode(restart):
+      global bot_mode,bot_wait,selected,pending_promotion,confirm_switch,board
       bot_mode=not bot_mode
+      if restart:
+            board=chess.Board()
       bot_wait=None
-      selected=None   
+      selected=None
+      pending_promotion=None
+      confirm_switch=False
+      
 def selected_piece():
       if selected is not None:
             col=chess.square_file(selected)
@@ -121,6 +126,7 @@ flash_square=None
 flash_time=0
 bot_wait=None
 bot_mode=True
+confirm_switch=False
 
 def piece_promotion(from_sq,to_sq,letter):
       if letter in PROMOTION_PIECES:
