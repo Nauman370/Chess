@@ -47,7 +47,11 @@ PIECE_VALUE={
       chess.BISHOP:3,
       chess.KING:0
 }
-
+THEMES={
+       "classic":{"light":(240,217,181),"dark":(181,136,99),
+                    "white":(255,255,255),"white_edge":(0,0,0),
+                    "black":(90,90,90),"black_edge":(255,255,255)}
+      
 def draw_piece():
       for row in range(8):
             for col in range(8):
@@ -146,6 +150,21 @@ def switch_mode(restart):
       selected=None
       pending_promotion=None
       confirm_switch=False
+
+def draw_legal_moves():
+      if selected is not None:
+            for move in board.legal_moves:
+                  if move.from_square==selected:
+
+                        col=chess.square_file(move.to_square)
+                        row=7-chess.square_rank(move.to_square)
+                        cx=OFFSET_X+col*SQUARE+SQUARE//2
+                        cy=row*SQUARE+SQUARE//2
+                        if board.piece_at(move.to_square)is not None:
+                              pygame.draw.circle(screen,(220,40,40),(cx,cy),SQUARE//2-4,5)
+                        else:
+                              pygame.draw.circle(screen,(70,70,70),(cx,cy),SQUARE//6)
+                        
 
 def selected_piece():
       if selected is not None:
@@ -252,6 +271,7 @@ while running:
     screen.fill((30,30,30))
     draw_board()
     draw_piece()
+    draw_legal_moves()
     selected_piece()
     draw_status()
     draw_flash()
