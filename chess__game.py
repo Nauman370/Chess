@@ -60,9 +60,11 @@ def draw_piece():
                         y=row*SQUARE+SQUARE//2
                         if piece.color==chess.WHITE:
                               fill=(255,255,255)
+                              outline=(0,0,0)
                         else:
-                              fill=(0,0,0)
-                        outline=(0,0,0)
+
+                              fill=(90,90,90)
+                              outline=(255,255,255)
                         for dx,dy in [(-2,0),(2,0),(0,-2),(0,2)]:
                               shadow=piece_font.render(symbol,True,outline)
                               screen.blit(shadow,shadow.get_rect(center=(x+dx,y+dy)))
@@ -230,7 +232,7 @@ while running:
                     if is_promotion and chess.Move(selected,square,promotion=chess.QUEEN) in board.legal_moves:
                           pending_promotion=(selected,square)
                     else:
-                          move=chess.Move(seleted,square)
+                          move=chess.Move(selected,square)
                           if move in board.legal_moves:
                                 board.push(move)
                           elif square!=selected:
