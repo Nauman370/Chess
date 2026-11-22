@@ -26,12 +26,13 @@ LIGHT=(240,217,181)
 DARK=(181,136,99)
 screen.fill((30,30,30))
 def draw_board():
+      t=current_theme()
       for row in range(8):
             for col in range(8):
                   if (row+col)%2==0:
-                        color=LIGHT
+                        color=t["light"]
                   else:
-                        color=DARK
+                        color=t["dark"]
                   pygame.draw.rect(screen,color,(OFFSET_X +col*SQUARE,row*SQUARE,SQUARE,SQUARE))
 PROMOTION_PIECES={
       "q":chess.QUEEN,
@@ -48,11 +49,27 @@ PIECE_VALUE={
       chess.KING:0
 }
 THEMES={
-       "classic":{"light":(240,217,181),"dark":(181,136,99),
-                    "white":(255,255,255),"white_edge":(0,0,0),
-                    "black":(90,90,90),"black_edge":(255,255,255)}
+      "Classic":{"light":(240,217,181),"dark":(181,136,99),
+                 "white":(255,255,255),"white_edge":(0,0,0),
+                 "black":(90,90,90),"black_edge":(255,255,255)},
+      "Green":{"light":(238,238,210),"dark":(118,150,86),
+               "white":(255,255,255),"white_edge":(0,0,0),
+               "black":(40,40,40),"black_edge":(255,255,255)},
+      "Blue":{"light":(222,227,230),"dark":(140,162,173),
+              "white":(255,255,255),"white_edge":(20,30,60),
+              "black":(35,50,90),"black_edge":(230,240,255)},
+      "Night":{"light":(120,120,140),"dark":(60,60,80),
+               "white":(240,240,255),"white_edge":(0,0,0),
+               "black":(20,20,30),"black_edge":(200,200,230)},
+}
+themes_name=list(THEMES)
+theme_index=0
+
+def current_theme():
+      return THEMES[themes_name[theme_index]]
       
 def draw_piece():
+      t=current_theme()
       for row in range(8):
             for col in range(8):
                   square=chess.square(col,7-row)
@@ -63,12 +80,11 @@ def draw_piece():
                         x=OFFSET_X+col*SQUARE+SQUARE//2
                         y=row*SQUARE+SQUARE//2
                         if piece.color==chess.WHITE:
-                              fill=(255,255,255)
-                              outline=(0,0,0)
+                              fill=t["white"]
+                              outline=t["white_edge"]
                         else:
-
-                              fill=(90,90,90)
-                              outline=(255,255,255)
+                              fill=t["black"]
+                              outline=t["black_edge"]
                         for dx,dy in [(-2,0),(2,0),(0,-2),(0,2)]:
                               shadow=piece_font.render(symbol,True,outline)
                               screen.blit(shadow,shadow.get_rect(center=(x+dx,y+dy)))
@@ -229,6 +245,8 @@ while running:
               if move is not None and move in  board.legal_moves:
                     board.push(move)
                     pending_promotion=None
+        if event.type==pygame.KEYDOWN and event.key==pygame.K_t:
+              theme_index=(theme_index+1)%len(themes_name)
         if event.type==pygame.MOUSEBUTTONDOWN:
               x,y=event.pos
               if undo_button().collidepoint(event.pos):
