@@ -102,6 +102,14 @@ def draw_flash():
                   col=chess.square_file(flash_square)
                   row=7-chess.square_rank(flash_square)
                   pygame.draw.rect(screen,(220,40,40),(OFFSET_X+col*SQUARE,row*SQUARE,SQUARE,SQUARE))
+def draw_last_move():
+      if len(board.move_stack)>0:
+            last=board.peek()
+            for sq in (last.from_square,last.to_square):
+                  col=chess.square_file(sq)
+                  row=7-chess.square_rank(sq)
+                  pygame.draw.rect(screen,(205,210,106),(OFFSET_X+col*SQUARE,row*SQUARE,SQUARE,SQUARE))
+      
 def confirm_screen():
       if confirm_switch:
             overlay=pygame.Surface((WIDTH,HEIGHT),pygame.SRCALPHA)
@@ -113,11 +121,14 @@ def confirm_screen():
             else:
                   new_mode="Bot mode"
 
-            lines=["Switch to"+ new_mode+"?","C=continue","R= Restart","C= Cancel"
-                   "1 for Easy mode",'2 for normal mode','3 for hard mode''4 for hardest']
+            lines=["Switch to" + new_mode+"?","C=continue","R= Restart","M=Cancel"]  
+            box=pygame.Rect(0,0,640,len(lines)*45+60)
+            box.center=(WIDTH//2,HEIGHT//2)
+            pygame.draw.rect(screen,(45,45,45), box,border_radius=14)
+            pygame.draw.rect(screen,(255,255,255),box,3,border_radius=14)
             for i, line in enumerate(lines):
                   text=small_FONT.render(line,True,(255,255,255))
-                  screen.blit(text,text.get_rect(center=(WIDTH//2,HEIGHT//2-90+i*60)))
+                  screen.blit(text,(box.left+30,box.top+30+i*45))
 
 def  help_button():
       return pygame.Rect(WIDTH-50,10,40,40)
@@ -136,6 +147,7 @@ def draw_help():
                    "M to switch Mode",
                    "T to switch Theme",
                    "H to toggle this",
+                   '1 for Easy,2 for hard,3 for harder,4 for hardest',
                    "Esc to exit"]
             box=pygame.Rect(0,0,640,len(lines)*45+60)
             box.center=(WIDTH//2,HEIGHT//2)
@@ -167,8 +179,8 @@ def draw_status():
                   message=message+"-Check"
       white_pts=material(board,chess.WHITE)
       black_pts=material(board,chess.BLACK)
-      black_text=small_FONT.render("BLACK"+ str(black_pts),True,(255,255,255))
-      white_text=small_FONT.render("WHITE"+ str(white_pts),True,(255,255,255))
+      black_text=small_FONT.render("BLACK : "+ str(black_pts),True,(255,255,255))
+      white_text=small_FONT.render("WHITE : "+ str(white_pts),True,(255,255,255))
       screen.blit(black_text,(20,20))
       screen.blit (white_text,(20,BOARD_SIZE-50))
       pygame.draw.rect(screen,(90,90,90),undo_button())
@@ -339,6 +351,7 @@ while running:
                 
     screen.fill((30,30,30))
     draw_board()
+    draw_last_move()
     draw_piece()
     draw_legal_moves()
     selected_piece()
