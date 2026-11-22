@@ -40,6 +40,9 @@ PROMOTION_PIECES={
       "n":chess.KNIGHT,
       "b":chess.BISHOP
 }
+DIFFICULTIES=[("Easy",1,0.1),("Medium",8,0.2),("Hard",15,0.5),("Max",20,1.0)]
+difficulty=1
+
 PIECE_VALUE={
       chess.PAWN:1,
       chess.ROOK:5, 
@@ -64,7 +67,10 @@ THEMES={
 }
 themes_name=list(THEMES)
 theme_index=0
-
+def set_difficulty(i):
+      global difficulty
+      difficulty=i
+      engine.configure({"Skill Level":DIFFICULTIES [i] [1]})
 def current_theme():
       return THEMES[themes_name[theme_index]]
       
@@ -107,7 +113,8 @@ def confirm_screen():
             else:
                   new_mode="Bot mode"
 
-            lines=["Switch to"+ new_mode+"?","C=continue","R= Restart","C= Cancel"]
+            lines=["Switch to"+ new_mode+"?","C=continue","R= Restart","C= Cancel"
+                   "1 for Easy mode",'2 for normal mode','3 for hard mode''4 for hardest']
             for i, line in enumerate(lines):
                   text=small_FONT.render(line,True,(255,255,255))
                   screen.blit(text,text.get_rect(center=(WIDTH//2,HEIGHT//2-90+i*60)))
@@ -160,13 +167,15 @@ def draw_status():
                   message=message+"-Check"
       white_pts=material(board,chess.WHITE)
       black_pts=material(board,chess.BLACK)
-      score_text=small_FONT.render("White:"+str(white_pts)+"  Black: "+str(black_pts),True,(255,255,255))
-      screen.blit(score_text,score_text.get_rect(topright=(undo_button().left-20,BOARD_SIZE+12)))
+      black_text=small_FONT.render("BLACK"+ str(black_pts),True,(255,255,255))
+      white_text=small_FONT.render("WHITE"+ str(white_pts),True,(255,255,255))
+      screen.blit(black_text,(20,20))
+      screen.blit (white_text,(20,BOARD_SIZE-50))
       pygame.draw.rect(screen,(90,90,90),undo_button())
       label=small_FONT.render("Undo",True,(255,255,255))
       screen.blit(label,label.get_rect(center=undo_button().center))
       if bot_mode:
-            mode_message="[Bot mode]"
+            mode_message="[Bot "+DIFFICULTIES[difficulty][0]+"]"
       else:
             mode_message="[2 player]"
       text=small_FONT.render(message+mode_message,True,(255,255,255))
@@ -231,7 +240,7 @@ def material(b,color):
       return total
 board=chess.Board()
 engine=chess.engine.SimpleEngine.popen_uci(r"stockfish.exe")
-engine.configure({"Skill Level":5})
+set_difficulty(1)
 print (evaluate(board))
 running=True
 selected=None
@@ -279,6 +288,9 @@ while running:
                     pending_promotion=None
         if event.type==pygame.KEYDOWN and event.key==pygame.K_t:
               theme_index=(theme_index+1)%len(themes_name)
+        if event.type==pygame.KEYDOWN and event.key in (pygame.K_1,pygame.K_2,pygame.K_3,pygame.K_4):
+              set_difficulty(event.key-pygame.K_1)
+              
         if event.type==pygame.MOUSEBUTTONDOWN:
               x,y=event.pos
               if show_help:
@@ -319,7 +331,7 @@ while running:
           if bot_wait is None:
                 bot_wait=pygame.time.get_ticks()
           elif pygame.time.get_ticks()-bot_wait>500:
-               result=engine.play(board,chess.engine.Limit(time=0.1))
+               result=engine.play(board,chess.engine.Limit(time=DIFFICULTIES[difficulty][2]))
                board.push(result.move)
                bot_wait=None
     else:
