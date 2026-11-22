@@ -3,7 +3,7 @@ import pygame
 import random
 
 pygame.init()
-small_FONT=pygame.font.SysFont("arial",48)
+small_FONT=pygame.font.SysFont("arial",30)
 info=pygame.display.Info()
 screen=pygame.display.set_mode((info.current_w-100,info.current_h-120),pygame.RESIZABLE)
 pygame.display.set_caption("Chess")
@@ -38,6 +38,14 @@ PROMOTION_PIECES={
       "r":chess.ROOK,
       "n":chess.KNIGHT,
       "b":chess.BISHOP
+}
+PIECE_VALUE={
+      chess.PAWN:1,
+      chess.ROOK:5, 
+      chess.QUEEN:9,
+      chess.KNIGHT:3,
+      chess.BISHOP:3,
+      chess.KING:0
 }
 
 def draw_piece():
@@ -102,6 +110,13 @@ def draw_status():
                   message="Black's Move"
             if board.is_check():
                   message=message+"-Check"
+      score=evaluate(board)
+      if score>0:
+            score_message="+"+str(score)
+      else:
+            score_message=str(score)
+      score_text=small_FONT.render("Score:"+score_message,True,(255,255,255))
+      screen.blit(score_text,score_text.get_rect(topright=(undo_button().left-20,BOARD_SIZE+12)))
       pygame.draw.rect(screen,(90,90,90),undo_button())
       label=small_FONT.render("Undo",True,(255,255,255))
       screen.blit(label,label.get_rect(center=undo_button().center))
@@ -135,7 +150,33 @@ def selected_piece():
             col=chess.square_file(selected)
             row=7-chess.square_rank(selected)
             pygame.draw.rect(screen,(246,246,105),(OFFSET_X+col*SQUARE , row*SQUARE,SQUARE,SQUARE),5)
+
+def evaluate(b):
+      score=0
+      for square in chess.SQUARES:
+            piece=b.piece_at(square)
+            if piece is not None:
+                  value=PIECE_VALUE[piece.piece_type]
+                  if piece.color==chess.WHITE:
+                        score=score+value
+                  else:
+                        score=score-value
+      return score
+
+def best_move(b):
+      best=None
+      best_score=9999
+      for move in b.legal_moves:
+            b.push(move)
+            score=evaluate(b)
+            b.pop()
+            if score<best_score:
+                  best_score=score
+                  best=move
+      return best
+
 board=chess.Board()
+print (evaluate(board))
 running=True
 selected=None
 pending_promotion=None
@@ -210,7 +251,7 @@ while running:
           if bot_wait is None:
                 bot_wait=pygame.time.get_ticks()
           elif pygame.time.get_ticks()-bot_wait>500:
-                bot_move=random.choice(list(board.legal_moves))
+                bot_move=best_move(board)
                 board.push(bot_move)
                 bot_wait=None
     else:
