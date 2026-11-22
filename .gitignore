@@ -1,1 +1,8 @@
 .vscode/settings.json
+*.toc
+*.pyc
+build/chess__game/warn-chess__game.txt
+build/chess__game/xref-chess__game.html
+build/chess__game/PYZ-00.pyz
+build/chess__game/chess__game.pkg
+build/chess__game/base_library.zip

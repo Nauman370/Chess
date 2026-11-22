@@ -1,6 +1,8 @@
 import chess
 import pygame
 import chess.engine
+import os
+import sys
 
 pygame.init()
 small_FONT=pygame.font.SysFont("arial",30)
@@ -201,6 +203,12 @@ def  do_undo():
             selected=None
 def undo_button():
       return pygame.Rect(OFFSET_X+BOARD_SIZE-120,BOARD_SIZE+5,120,40)
+
+def resource_path(name):
+      if hasattr(sys,"_MEIPASS"):
+            return os.path.join(sys._MEIPASS,name)
+      return os.path.join(os.path.dirname(os.path.abspath(__file__)),name)
+
 def switch_mode(restart):
       global bot_mode,bot_wait,selected,pending_promotion,confirm_switch,board
       bot_mode=not bot_mode
@@ -251,7 +259,7 @@ def material(b,color):
                   total=total+PIECE_VALUE[piece.piece_type]
       return total
 board=chess.Board()
-engine=chess.engine.SimpleEngine.popen_uci(r"stockfish.exe")
+engine=chess.engine.SimpleEngine.popen_uci(resource_path("stockfish.exe"))
 set_difficulty(1)
 print (evaluate(board))
 running=True
