@@ -1,6 +1,6 @@
 import chess
 import pygame
-import random
+import chess.engine
 
 pygame.init()
 small_FONT=pygame.font.SysFont("arial",30)
@@ -163,19 +163,9 @@ def evaluate(b):
                         score=score-value
       return score
 
-def best_move(b):
-      best=None
-      best_score=9999
-      for move in b.legal_moves:
-            b.push(move)
-            score=evaluate(b)
-            b.pop()
-            if score<best_score:
-                  best_score=score
-                  best=move
-      return best
-
 board=chess.Board()
+engine=chess.engine.SimpleEngine.popen_uci(r"stockfish.exe")
+engine.configure({"Skill Level":5})
 print (evaluate(board))
 running=True
 selected=None
@@ -240,7 +230,7 @@ while running:
                     if is_promotion and chess.Move(selected,square,promotion=chess.QUEEN) in board.legal_moves:
                           pending_promotion=(selected,square)
                     else:
-                          move=chess.Move(selected,square)
+                          move=chess.Move(seleted,square)
                           if move in board.legal_moves:
                                 board.push(move)
                           elif square!=selected:
@@ -251,9 +241,9 @@ while running:
           if bot_wait is None:
                 bot_wait=pygame.time.get_ticks()
           elif pygame.time.get_ticks()-bot_wait>500:
-                bot_move=best_move(board)
-                board.push(bot_move)
-                bot_wait=None
+               result=engine.play(board,chess.engine.Limit(time=0.1))
+               board.push(result.move)
+               bot_wait=None
     else:
           bot_wait=None
                 
@@ -266,30 +256,4 @@ while running:
     confirm_screen()
     pygame.display.flip()
 pygame.quit()
-
-
-if board.turn==chess.WHITE:
-        print("White's Move")
-else:
-        print("Black's Move")
-
-move=input("Last move:")
-
-try:
-        board.push_san(move)
-except(ValueError):
-        print("Illegal move")
-
-print()
-print(board)
-print()
-
-result=board.result()
-
-
-if result=="1-0" and board.is_checkmate() is True :
-    print("White won","Checkmate")
-elif result=="0-1" and board.is_checkmate() is True:
-    print("Black won","Checkmate")
-elif board.is_stalemate() is True:
-    print("Stalemate")
+engine.quit()
