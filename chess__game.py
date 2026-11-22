@@ -3,6 +3,7 @@ import pygame
 import chess.engine
 import os
 import sys
+import subprocess
 
 pygame.init()
 small_FONT=pygame.font.SysFont("arial",30)
@@ -259,7 +260,7 @@ def material(b,color):
                   total=total+PIECE_VALUE[piece.piece_type]
       return total
 board=chess.Board()
-engine=chess.engine.SimpleEngine.popen_uci(resource_path("stockfish.exe"))
+engine=chess.engine.SimpleEngine.popen_uci(resource_path("stockfish.exe"),creationflags=subprocess.CREATE_NO_WINDOW)
 set_difficulty(1)
 print (evaluate(board))
 running=True
