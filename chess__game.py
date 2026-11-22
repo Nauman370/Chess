@@ -112,6 +112,32 @@ def confirm_screen():
                   text=small_FONT.render(line,True,(255,255,255))
                   screen.blit(text,text.get_rect(center=(WIDTH//2,HEIGHT//2-90+i*60)))
 
+def  help_button():
+      return pygame.Rect(WIDTH-50,10,40,40)
+def draw_help():
+      pygame.draw.rect(screen,(90,90,90),help_button(),border_radius=8)
+      q=small_FONT.render("?",True,(255,255,255))
+      screen.blit(q,q.get_rect(center=help_button().center))
+
+      if show_help:
+            overlay=pygame.Surface((WIDTH,HEIGHT),pygame.SRCALPHA)
+            overlay.fill((0,0,0,170))
+            screen.blit(overlay,(0,0))
+
+            lines=[
+                   "U to Undo a Move",
+                   "M to switch Mode",
+                   "T to switch Theme",
+                   "H to toggle this",
+                   "Esc to exit"]
+            box=pygame.Rect(0,0,640,len(lines)*45+60)
+            box.center=(WIDTH//2,HEIGHT//2)
+            pygame.draw.rect(screen,(45,45,45),box,border_radius=14)
+            pygame.draw.rect(screen,(255,255,255),box,3,border_radius=14)
+            for i,lines in enumerate(lines):
+                  text=small_FONT.render(lines,True,(255,255,255))
+                  screen.blit(text,(box.left+30,box.top+30+i*45)) 
+
 
 def draw_status():
       pygame.draw.rect(screen,(50,50,50),(0,BOARD_SIZE,WIDTH,HEIGHT-BOARD_SIZE))
@@ -212,6 +238,7 @@ flash_time=0
 bot_wait=None
 bot_mode=True
 confirm_switch=False
+show_help=False
 
 def piece_promotion(from_sq,to_sq,letter):
       if letter in PROMOTION_PIECES:
@@ -230,6 +257,8 @@ while running:
               do_undo()
         if event.type==pygame.KEYDOWN and event.key==pygame.K_m and pending_promotion is  None:
               confirm_switch=not confirm_switch
+        if event.type==pygame.KEYDOWN and event.key==pygame.K_h:
+              show_help=not show_help
         if event.type==pygame.KEYDOWN and confirm_switch:
               if event.key==pygame.K_c:
                     switch_mode(False)
@@ -249,6 +278,13 @@ while running:
               theme_index=(theme_index+1)%len(themes_name)
         if event.type==pygame.MOUSEBUTTONDOWN:
               x,y=event.pos
+              if show_help:
+                    show_help=False
+                    continue
+              if help_button().collidepoint(event.pos):
+                    show_help=True
+                    continue
+              
               if undo_button().collidepoint(event.pos):
                     do_undo()
               if (not  bot_mode or board.turn==chess.WHITE) and pending_promotion  is None  and not board.is_game_over() and y<BOARD_SIZE and OFFSET_X<=x<OFFSET_X+BOARD_SIZE:
@@ -294,6 +330,7 @@ while running:
     draw_status()
     draw_flash()
     confirm_screen()
+    draw_help()
     pygame.display.flip()
 pygame.quit()
 engine.quit()
