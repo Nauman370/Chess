@@ -158,12 +158,9 @@ def draw_status():
                   message="Black's Move"
             if board.is_check():
                   message=message+"-Check"
-      score=evaluate(board)
-      if score>0:
-            score_message="+"+str(score)
-      else:
-            score_message=str(score)
-      score_text=small_FONT.render("Score:"+score_message,True,(255,255,255))
+      white_pts=material(board,chess.WHITE)
+      black_pts=material(board,chess.BLACK)
+      score_text=small_FONT.render("White:"+str(white_pts)+"  Black: "+str(black_pts),True,(255,255,255))
       screen.blit(score_text,score_text.get_rect(topright=(undo_button().left-20,BOARD_SIZE+12)))
       pygame.draw.rect(screen,(90,90,90),undo_button())
       label=small_FONT.render("Undo",True,(255,255,255))
@@ -225,7 +222,13 @@ def evaluate(b):
                   else:
                         score=score-value
       return score
-
+def material(b,color):
+      total=0
+      for square in chess.SQUARES:
+            piece=b.piece_at(square)
+            if piece is not None and piece.color==color:
+                  total=total+PIECE_VALUE[piece.piece_type]
+      return total
 board=chess.Board()
 engine=chess.engine.SimpleEngine.popen_uci(r"stockfish.exe")
 engine.configure({"Skill Level":5})
